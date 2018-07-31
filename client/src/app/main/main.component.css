@@ -1,0 +1,11 @@
+.header {
+	height: 150px;
+	border: 1px solid black;
+	align-self: stretch;
+}
+.body {
+	min-height: 650px;
+	max-height: 650px;
+	display: flex;
+	flex-direction: row;
+}

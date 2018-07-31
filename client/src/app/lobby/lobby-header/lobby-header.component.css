@@ -1,0 +1,27 @@
+.mainheader {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-items: stretch;
+	height: 150px;
+}
+.leftheader {
+	flex: 0 0 60%;
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-items: stretch;
+}
+.rankpicture {
+	height: 150px;
+	width: 150px;
+	border: 1px solid black;
+}
+.userinfo {
+	flex: 1 1 auto;
+}
+.rightheader {
+	border: 1px solid black;
+	flex: 0 0 40%;
+}

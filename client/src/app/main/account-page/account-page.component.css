@@ -1,0 +1,12 @@
+.accountpage {
+	border: 1px solid black;
+	flex: 0 1 50%;
+}
+.invalid {
+	color: #FF0000;
+	font-weight: bold;
+}
+.helper {
+	font-size: 12px;
+	font-weight: lighter;
+}

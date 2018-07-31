@@ -1,0 +1,28 @@
+<div class="accountpage">
+		<b>Account Creation</b>
+		<br>
+
+		<br><label :class="{invalid: usernameInvalid}">Username <span class="helper">(3-16 non-special characters)</span></label><br>
+		<input type="text">
+		<br>
+
+		<br><label :class="{invalid: passwordInvalid}">Password <span class="helper">(minimum 8 characters)</span></label><br>
+		<input type="password">
+		<br>
+
+		<br><label :class="{invalid: emailInvalid}">E-mail <span class="helper" >(must follow format name@domain)</span></label><br>
+		<input  type="text">
+		<br>
+
+		<br>
+		<div class="buttons">
+			<button >Create Account</button>
+			
+			<p>Username is taken!</p>
+			<h2>Activation email sent.</h2>
+			
+			<br >
+
+			<button (click)="goToLogin()">Back</button>
+		</div>
+</div>
