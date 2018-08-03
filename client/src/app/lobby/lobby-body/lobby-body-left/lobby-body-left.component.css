@@ -1,0 +1,27 @@
+.leftside {
+	order: 1;
+	flex: 0 0 200px;
+	border: 1px solid black;
+	text-align: center;
+}
+li {
+	list-style-type: none;
+	font-style: italic;
+}
+li:hover {
+	color: red;
+	font-size: 110%;
+	cursor: pointer;
+}
+.admin {
+	font-weight: bold;
+	color: blue;
+}
+.mod {
+	font-weight: bold;
+	color: red;
+}
+.supermod {
+	font-weight: bold;
+	color: pink;
+}

@@ -1,0 +1,44 @@
+.chatbody {
+	flex: 1 1 auto;
+	overflow-y: auto;
+}	
+
+.middleside {
+	order: 2;
+	flex: 1 1 auto;
+	border: 1px solid black;
+	display: flex;
+	flex-direction: column;
+}
+.tabs {
+	flex: 0 0 20px;
+	border: 1px solid black;
+	display: flex;
+	flex-direction: row;
+}
+.eachTab {
+	border: 1px solid black;
+	flex: 1 1 auto;
+}
+.chatbody {
+	flex: 1 0 200px;
+	overflow-y: auto;
+}
+#mainChat {
+	list-style-type: none;
+}
+.chatinput {
+}
+
+#chatinput {
+	width: 90%;
+}
+.active {
+	background-color: red;
+}
+.blue {
+	background-color: teal;
+}
+.green {
+	background-color: green;
+}

@@ -1,0 +1,6 @@
+.mainbody {
+	min-height: 650px;
+	max-height: 650px;
+	display: flex;
+	flex-direction: row;
+}

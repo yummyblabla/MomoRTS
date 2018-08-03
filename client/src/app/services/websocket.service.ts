@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as Rx from 'rxjs';
+import { webSocket } from 'rxjs/websocket';
+
+import * as crypto from 'crypto';
 
 import { Observable, Observer, Subject } from 'rxjs';
 
@@ -8,38 +11,17 @@ import { Observable, Observer, Subject } from 'rxjs';
 })
 
 export class WebsocketService {
-	private socket: Subject<any>;
+    private SERVER_URL = "ws://localhost:1337" as string;
 
-  	public connect(url: string): Subject<any> {
-  		if (!this.socket) {
-  			this.socket = this.create(url);
-  			console.log("Connected to: " + url);
-  		}
-  		return this.socket;
-  	}
+    public openEvents = new Subject();
 
-  	private create(url: string): Subject<any> {
-  		let ws = new WebSocket(url);
+    public subject = webSocket({
+      url: this.SERVER_URL,
+      openObserver: this.openEvents});
 
-  		let observable = Observable.create(
-  			(obs: Rx.Observer<any>) => {
-  				ws.onmessage = obs.next.bind(obs);
-  				ws.onerror = obs.error.bind(obs);
-  				ws.onclose = obs.complete.bind(obs);
 
-  				return ws.close.bind(ws);
-  			}
-  		);
-
-  		let observer = {
-  			next: (data: Object) => {
-  				if (ws.readyState === WebSocket.OPEN) {
-  					ws.send(JSON.stringify(data));
-  				}
-  			}
-  		}
-
-  		return Subject.create(observer, observable);
-  	}
-
+    
+    public hash(input) {
+      return crypto.createHash('sha256').update(input).digest('hex');
+    }
 }

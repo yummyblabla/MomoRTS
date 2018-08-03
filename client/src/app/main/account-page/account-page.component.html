@@ -1,28 +1,99 @@
 <div class="accountpage">
-		<b>Account Creation</b>
-		<br>
+<!-- Account Create Form -->
+	<form [formGroup]="accountCreateForm" (ngSubmit)="onCreate()">
 
-		<br><label :class="{invalid: usernameInvalid}">Username <span class="helper">(3-16 non-special characters)</span></label><br>
-		<input type="text">
-		<br>
+		<!-- User Info Form -->
+		<div [formGroup]="userInfoForm">
+			<b>Account Creation</b>
+			<br>
+			<br>
 
-		<br><label :class="{invalid: passwordInvalid}">Password <span class="helper">(minimum 8 characters)</span></label><br>
-		<input type="password">
-		<br>
+			<!-- Username input -->
+			<label>Username <span class="helper">(5-15 non-special characters)</span></label>
+			<br>
+			<input 
+				type="text" 
+				id="username"
+				formControlName="username">
 
-		<br><label :class="{invalid: emailInvalid}">E-mail <span class="helper" >(must follow format name@domain)</span></label><br>
-		<input  type="text">
-		<br>
+			<!-- Error messages for when username cannot be validated -->
+			<div 
+				class="form-control-feedback"
+				*ngIf="username.invalid && (username.dirty || username.touched)">
+				<span *ngIf="username.errors.required">Username is required</span>
+				<span *ngIf="username.errors.minlength">Username must be at least 5 characters long</span>
+				<span *ngIf="username.errors.maxlength">Username cannot be longer than 15 characters</span>
+			</div>
 
-		<br>
+			<br>
+			<br>
+
+
+			<!-- Email input -->
+			<label>E-mail <span class="helper">(must follow format name@domain)</span></label>
+			<br>
+			<input 
+				type="text"
+				id="email"
+				formControlName="email">
+
+			<!-- Error messages when email is not valid -->
+			<div 
+				class="form-control-feedback"
+				*ngIf="email.invalid && (email.dirty || email.touched)">
+				<span *ngIf="email.errors.required">E-mail is required</span>
+				<span *ngIf="email.errors.email">Please enter a valid e-mail</span>
+			</div>
+		</div>
+
+		<!-- Password Form Group -->
+		<div [formGroup]="passwordFormGroup">
+
+			<!-- Password Input -->
+			<label>Password <span class="helper">(minimum 8 characters)</span></label>
+			<br>
+			<input 
+				type="password"
+				id="password"
+				formControlName="password">
+			<br>
+
+			<!-- Error messages for when password cannot be validated -->
+			<div 
+				class="form-control-feedback"
+				*ngIf="password.invalid && (password.dirty || password.touched)">
+				<span *ngIf="password.errors.required">Password is required</span>
+				<span *ngIf="password.errors.minlength">Password must be at least 8 characters long</span>
+			</div>
+
+			<!-- Confirm Password Input -->
+			<label>Confirm Password</label>
+			<br>
+			<input 
+				type="password"
+				id="password"
+				formControlName="confirmPassword">
+			<br>
+
+			<!-- Error messages for when passform is not confirmed -->
+			<div 
+				class="form-control-feedback"
+				*ngIf="passwordFormGroup.invalid && confirmPassword.touched">
+				<span>Passwords do not match</span>
+			</div>
+		</div>
+
+		<button>Create Account</button>
+	</form>
+
 		<div class="buttons">
-			<button >Create Account</button>
+			<p *ngIf="incorrectFormInput">Something is wrong with the form. Please make corrections</p>
+			<p *ngIf="accountCreateFail">Username is taken!</p>
+			<h2 *ngIf="accountCreateSuccess">Activation email sent.</h2>
 			
-			<p>Username is taken!</p>
-			<h2>Activation email sent.</h2>
-			
-			<br >
+			<br>
 
 			<button (click)="goToLogin()">Back</button>
 		</div>
+		
 </div>

@@ -12,7 +12,6 @@ class WebSocketServer {
         this.sessionInfo = {};
         this.listeners = [];
         this.PORT = process.env.PORT || 1337;
-        this.DATABASE = 'mongodb://localhost:27017/MomoRTS';
         this.createApp();
         this.createServer();
         this.websockets();
@@ -36,13 +35,6 @@ class WebSocketServer {
             server: this.server
         });
     }
-    // Connect to MongoDB Database
-    // private connectToDB() {
-    // 	MongoClient.connect(this.DATABASE, {useNewUrlParser: true}, function(err: any, client: any) {
-    // 		assert.equal(null, err);
-    // 		console.log("Connected to MongoDB server");
-    // 	})
-    // }
     // Start the server by listening to Port
     listen() {
         this.server.listen(this.PORT, () => {
@@ -111,6 +103,15 @@ class WebSocketServer {
     // Add listeners to onmessage emitter
     addListeners(listener) {
         this.listeners.push(listener);
+    }
+    // Utility function that checks keys of the JSON sent to server for validation
+    validateProperties(data, properties) {
+        for (let i in properties) {
+            if (!(properties[i] in data)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 exports.WebSocketServer = WebSocketServer;
