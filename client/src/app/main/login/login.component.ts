@@ -26,12 +26,11 @@ export class LoginComponent implements OnInit {
 				private userInfoService: UserInfoService) { }
 
 	ngOnInit() {
-// Subscribes to WebSocketSubject
-
+// Creates form controls and groups for log-in information
 		this.createFormControls();
 		this.createFormGroup();
+// Initializes the log-in subscriber
 		this.checkLogin();
-		this.checkForAccountVerification();
 	}
 
 // Emits boolean to change showLogin in MainComponent to go to the Account page
@@ -83,35 +82,6 @@ export class LoginComponent implements OnInit {
 			'username': this.username,
 			'password': this.passwordInput,
 		});
-	}
-
-	public checkForAccountVerification() {
-		let pairs = location.search.slice(1).split('&');
-    
-    	let result = {};
-    	pairs.forEach(function(pair) {
-        	pairs = pair.split('=');
-        	result[pairs[0]] = decodeURIComponent(pairs[1] || '');
-    	});
-
-	    let query = JSON.parse(JSON.stringify(result));
-
-	    if ("user" in query && "code" in query) {
-	    	
-	    	this.wsService.subject.next({
-	    		type: "verify-account",
-	    		username: query.user,
-	    		activationCode: query.code
-	    	});
-	    	
-	    	let accountSubscribe = this.wsService.subject.subscribe((data) => {
-	    		if (data["type"] == "account-activated") {
-	    			alert("Account activated!");
-	    			accountSubscribe.unsubscribe();
-	    		}
-	    		
-			});
-		}
 	}
 
 	ngOnDestroy() {

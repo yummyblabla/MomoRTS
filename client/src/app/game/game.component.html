@@ -1,3 +1,10 @@
-<p>
-  game works!
-</p>
+<script type="text/javascript">
+    let type = "WebGL"
+    if(!PIXI.utils.isWebGLSupported()){
+      type = "canvas"
+    }
+
+    PIXI.utils.sayHello(type)
+</script>
+
+<div id="pixi-canvas"></div>

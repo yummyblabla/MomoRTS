@@ -38,4 +38,8 @@ export class AppComponent implements OnInit {
   goToGame() {
     this.router.navigate(['game'], {skipLocationChange: true});
   }
+
+  goToVerify() {
+    this.router.navigate(['verify']);
+  }
 }

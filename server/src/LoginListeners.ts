@@ -120,7 +120,7 @@ let listener = function(clients: any, sessionInfo: any, index: number, data: any
 						from: "momorts.verify@gmail.com",
 						to: data.email,
 						subject: "MomoRTS Account Verification",
-						html: `<a href="http://localhost:4200/?user=${data.username}&code=${activationCode}">Activation URL</a>`
+						html: `<a href="http://localhost:4200/verify/?user=${data.username}&code=${activationCode}">Activation URL</a>`
 				};
 
 				transporter.sendMail(mailOptions, (error, info) => {

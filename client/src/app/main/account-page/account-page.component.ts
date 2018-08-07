@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 
 import { PasswordValidator } from './password.validator';
@@ -32,8 +32,10 @@ export class AccountPageComponent implements OnInit {
 				private wsService: WebsocketService) { }
 
 	ngOnInit() {
+// Initializes the form controls and form for account creation information
 		this.createFormControls();
 		this.createForm();
+// Initializes the subscriber to send and listen for server messages 
 		this.accountCreationListenerInit();
 	}
 
@@ -108,5 +110,10 @@ export class AccountPageComponent implements OnInit {
 // Emits boolean to change showLogin in MainComponent to go to the Login page
 	goToLogin() {
 		this.changePage.emit(true);
+	}
+
+// Unsubscribes from websocket when component is destroyed
+	ngOnDestroy() {
+		this.accountCreationListener.unsubscribe();
 	}
 }

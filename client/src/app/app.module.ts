@@ -19,6 +19,7 @@ import { LobbyBodyRightComponent } from './lobby/lobby-body/lobby-body-right/lob
 import { WebsocketService } from './services/websocket.service';
 import { UserInfoService } from './services/user-info.service';
 import { AuthGuardService } from './services/auth-guard.service';
+import { AccountVerifyComponent } from './account-verify/account-verify.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { AuthGuardService } from './services/auth-guard.service';
     LobbyFooterComponent,
     LobbyBodyLeftComponent,
     LobbyBodyMiddleComponent,
-    LobbyBodyRightComponent
+    LobbyBodyRightComponent,
+    AccountVerifyComponent
   ],
   imports: [
     BrowserModule,
