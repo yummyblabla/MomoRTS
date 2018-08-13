@@ -5,6 +5,7 @@ import { MainComponent } from './main/main.component';
 import { LobbyComponent } from './lobby/lobby.component';
 import { GameComponent } from './game/game.component';
 import { AccountVerifyComponent } from './account-verify/account-verify.component';
+import { MapEditorComponent } from './mapeditor/mapeditor.component';
 
 import { AuthGuardService } from './services/auth-guard.service';
 
@@ -13,6 +14,7 @@ const appRoutes: Routes = [
   { path: 'lobby', canActivate: [AuthGuardService], component: LobbyComponent },
   { path: 'game', component: GameComponent },
   { path: 'verify', component: AccountVerifyComponent },
+  { path: 'mapeditor', component: MapEditorComponent },
   { path: '**', redirectTo: '' }
 ];
 

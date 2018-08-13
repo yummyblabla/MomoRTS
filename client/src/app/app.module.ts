@@ -20,6 +20,7 @@ import { WebsocketService } from './services/websocket.service';
 import { UserInfoService } from './services/user-info.service';
 import { AuthGuardService } from './services/auth-guard.service';
 import { AccountVerifyComponent } from './account-verify/account-verify.component';
+import { MapEditorComponent } from './mapeditor/mapeditor.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { AccountVerifyComponent } from './account-verify/account-verify.componen
     LobbyBodyLeftComponent,
     LobbyBodyMiddleComponent,
     LobbyBodyRightComponent,
-    AccountVerifyComponent
+    AccountVerifyComponent,
+    MapEditorComponent
   ],
   imports: [
     BrowserModule,
