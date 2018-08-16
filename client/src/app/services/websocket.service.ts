@@ -11,7 +11,7 @@ import { Observable, Observer, Subject } from 'rxjs';
 })
 
 export class WebsocketService {
-    private SERVER_URL = "ws://localhost:1337" as string;
+    private SERVER_URL: string = "ws://localhost:1337";
 
     public openEvents = new Subject();
 

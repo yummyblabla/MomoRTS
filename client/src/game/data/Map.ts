@@ -9,9 +9,10 @@ export class Map {
 	units: any; // An array of units
 	defaultHeight: number; // defaultHeight - The default height of the map
 
-	constructor(width, height, tiles, mapObjects, buildings, units, defaultHeight) {
-	 	this.width = width;
+	constructor(height, width, tiles, mapObjects, buildings, units, defaultHeight) {
+	 	
 	 	this.height = height;
+	 	this.width = width;
 	 	this.tiles = tiles;
 	 	this.mapObjects = [];
 	 	this.buildings = [];

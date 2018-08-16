@@ -1,0 +1,17 @@
+.container {
+	display: flex;
+	flex-direction: row;
+}
+
+.mapDimensions {
+	order: 1;
+}
+
+.changeMapDimension {
+	order: 2;
+}
+
+.buttons {
+	order: 3;
+	margin-left: 100px;
+}

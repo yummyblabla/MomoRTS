@@ -5,6 +5,7 @@ import { WebsocketService } from './services/websocket.service';
 import { UserInfoService } from './services/user-info.service';
 import { AuthGuardService } from './services/auth-guard.service';
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -40,6 +41,6 @@ export class AppComponent implements OnInit {
   }
 
   goToVerify() {
-    this.router.navigate(['verify']);
+    this.router.navigate(['mapeditor'], {skipLocationChange: true});
   }
 }

@@ -8,3 +8,36 @@
 </script>
 
 <div id="pixi-canvas"></div>
+
+<div class=container>
+
+	<form class=mapDimensions [formGroup]="dimension_change">
+		<label>Map Height</label>
+		<input 
+			type="text"
+			id="height_change"
+			formControlName="height_change"
+			NumbersOnly>
+		<br>
+
+		<label>Map Width</label>
+		<input 
+			type="text"
+			id="width_change"
+			formControlName="width_change"
+			NumbersOnly>
+	</form>
+
+	<div class=changeMapDimension>
+		<button (click)="requestChangeDimensions()">Change</button>
+	</div>
+
+	<div class=buttons>
+		<button>Save</button>
+		<button>Upload</button>
+		<br>
+		<button>Go back to lobby</button>
+	</div>
+
+
+</div>

@@ -15,12 +15,16 @@ import { LobbyFooterComponent } from './lobby/lobby-footer/lobby-footer.componen
 import { LobbyBodyLeftComponent } from './lobby/lobby-body/lobby-body-left/lobby-body-left.component';
 import { LobbyBodyMiddleComponent } from './lobby/lobby-body/lobby-body-middle/lobby-body-middle.component';
 import { LobbyBodyRightComponent } from './lobby/lobby-body/lobby-body-right/lobby-body-right.component';
+import { AccountVerifyComponent } from './account-verify/account-verify.component';
+import { MapEditorComponent } from './mapeditor/mapeditor.component';
 
 import { WebsocketService } from './services/websocket.service';
 import { UserInfoService } from './services/user-info.service';
 import { AuthGuardService } from './services/auth-guard.service';
-import { AccountVerifyComponent } from './account-verify/account-verify.component';
-import { MapEditorComponent } from './mapeditor/mapeditor.component';
+import { MapeditorService } from './services/mapeditor.service';
+
+import { NumberOnlyDirective } from './directives/number.directive';
+
 
 @NgModule({
   declarations: [
@@ -37,14 +41,15 @@ import { MapEditorComponent } from './mapeditor/mapeditor.component';
     LobbyBodyMiddleComponent,
     LobbyBodyRightComponent,
     AccountVerifyComponent,
-    MapEditorComponent
+    MapEditorComponent,
+    NumberOnlyDirective
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule
   ],
-  providers: [WebsocketService, UserInfoService, AuthGuardService],
+  providers: [WebsocketService, UserInfoService, AuthGuardService, MapeditorService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

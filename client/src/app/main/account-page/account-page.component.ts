@@ -52,7 +52,6 @@ export class AccountPageComponent implements OnInit {
 		this.confirmPassword = new FormControl('', { validators: 
 			[Validators.required],
 			updateOn: 'blur' });
-		
 	}
 
 // Appends the FormControls to the FormGroup
@@ -71,7 +70,6 @@ export class AccountPageComponent implements OnInit {
 			'userInfoForm': this.userInfoForm,
 			'passwordFormGroup': this.passwordFormGroup
 		});
-	
 	}
 
 // Sends server to initiate account creation
