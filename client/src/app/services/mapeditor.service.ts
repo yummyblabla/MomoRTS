@@ -16,29 +16,45 @@ export class MapeditorService {
 	constructor() { }
 
 	generateDefaultMap() {
-		this.map = new Map(50, 50, [], [], [], [], 0);
-		for (let x = 0; x < this.map.width; x++) {
+		let width: number = 5;
+		let height: number = 5;
+		for (let x = 0; x < width; x++) {
 			this.tiles.push([]);
-			for (let y = 0; y < this.map.height; y++) {
+			for (let y = 0; y < height; y++) {
 				this.tiles[x].push("0");
 			}
 		}
-		this.map.tiles = this.tiles;
+		this.map = new Map(height, width, this.tiles, [], [], [], 0);
 		this.width = this.map.width;
 		this.height = this.map.height;
 
 		this.newMap = false;
 	}
 
+// Change dimensions and create a new map object
 	changeDimensions(height: number, width: number) {
-		this.map = new Map(height, width, [], [], [], [], 0);
-		for (let x = 0; x < this.map.width; x++) {
+		// Clear existing tiles
+		this.clearTiles();
+
+		// Push placeholder tiles to the tile array
+		for (let x = 0; x < width; x++) {
 			this.tiles.push([]);
-			for (let y = 0; y < this.map.height; y++) {
+			for (let y = 0; y < height; y++) {
 				this.tiles[x].push("0");
 			}
 		}
+		// Generate new map
+		this.map = new Map(height, width, this.tiles, [], [], [], 0);
+
+		this.width = this.map.width;
+		this.height = this.map.height;
+
+		return true;
 	}
 
-	
+	clearTiles() {
+		this.tiles = [];
+	}
+
+
 }

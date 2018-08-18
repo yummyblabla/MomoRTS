@@ -14,6 +14,12 @@ export class Tile {
 		Unbuildable - Y
 
 **/
+	height_0: string = "0";
+	height_1: string = "1";
+	height_2: string = "2";
+	height_3: string = "3";
+	height_array: string[] = [this.height_0, this.height_1, this.height_2, this.height_3];
+
 	horizontal_ramp: string = "H";
 	vertical_ramp: string = "V";
 	diagonal1_ramp: string = "D";
@@ -21,21 +27,11 @@ export class Tile {
 	// MapEditor access for which ramp to use based on currentTool value
 	ramp_array: string[] = [this.horizontal_ramp, this.vertical_ramp, this.diagonal1_ramp, this.diagonal2_ramp];
 
-	waterTile: string = "W";
+	water_tile: string = "W";
 
 	impassable: string = "X";
 	unbuildable: string = "Y";
-
-	// Get Ramp Array
-	getRampArray() {
-		return this.ramp_array;
-	}
 	
-	// Get Water Tile
-	getWaterTile() {
-		return this.waterTile;
-	}
-
 	// Add impassable function to tile
 	addImpassable(tile: string) {
 		let value = tile.toString();
@@ -81,5 +77,9 @@ export class Tile {
 		let extra = tile.substring(1, tile.length);
 
 		return value + extra;
+	}
+
+	checkBase(tile: string) {
+		return tile.substring(0, 1);
 	}
 }

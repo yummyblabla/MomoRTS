@@ -17,6 +17,7 @@
 			type="text"
 			id="height_change"
 			formControlName="height_change"
+			placeholder="100"
 			NumbersOnly>
 		<br>
 
@@ -25,6 +26,7 @@
 			type="text"
 			id="width_change"
 			formControlName="width_change"
+			placeholder="100"
 			NumbersOnly>
 	</form>
 
@@ -39,5 +41,6 @@
 		<button>Go back to lobby</button>
 	</div>
 
-
+	<button (click)="goToRenderMode()">Go to rendermode</button>
+	<button (click)="goToBlueprintMode()">Go to blueprint mode</button>
 </div>

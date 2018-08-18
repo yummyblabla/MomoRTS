@@ -1,4 +1,5 @@
 // todo set tile container to invisible if offscreen
+// add mouseleave for blueprint container to turn off selected boolean
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
@@ -27,7 +28,7 @@ import { MapeditorService } from './../services/mapeditor.service';
 
 export class MapEditorComponent implements OnInit {
 
-// Map Editor Modes
+// Map Editor Modes (Always start in blueprint mode)
 	blueprint_mode: boolean = true;
 	render_mode: boolean = false;
 
@@ -53,6 +54,8 @@ export class MapEditorComponent implements OnInit {
 
 // Map Tile Textures for sprite generation for maptile and example boxes
 
+	map_editor_assets: PIXI.BaseTexture;
+
 	// Height
 	height_0_texture: PIXI.Texture;
 	height_1_texture: PIXI.Texture;
@@ -61,7 +64,6 @@ export class MapEditorComponent implements OnInit {
 	height_texture_array = [this.height_0_texture, this.height_1_texture, this.height_2_texture, this.height_3_texture];
 
 	// Ramp
-	all_ramps_texture: PIXI.BaseTexture;
 	ramp_horizontal_texture: PIXI.Texture;
 	ramp_vertical_texture: PIXI.Texture;
 	ramp_diagonal1_texture: PIXI.Texture;
@@ -77,7 +79,7 @@ export class MapEditorComponent implements OnInit {
 	other_texture_array: PIXI.Texture[];
 
 	// Directories
-	ramp_dir = "./../../assets/mapeditor/editorAssets.png";
+	map_editor_assets_dir = "./../../assets/mapeditor/editorAssets.png";
 	water_dir = "./../../assets/mapeditor/water.png";
 	no_passing_dir = "./../../assets/mapeditor/noWalking.png";
 	no_building_dir = "./../../assets/mapeditor/noBuilding.png";
@@ -157,12 +159,6 @@ export class MapEditorComponent implements OnInit {
 	ZOOM_FACTOR: number = 0.05;
 	SCROLL_FACTOR: number = 30;
 
-// Inputs (left right down up)
-	left;
-	right;
-	down;
-	up;
-
 // PIXI Interaction Manager
 	camera: PIXI.interaction.InteractionManager;
 
@@ -170,9 +166,9 @@ export class MapEditorComponent implements OnInit {
 	}
 
 	ngOnInit() {
+		this.generateMap();
 		this.createFormDimension();
 		this.pixiLoaderInit();
-		this.generateMap();
 	}
 
 // Initialize PIXI.loader and assign textures to images
@@ -182,44 +178,74 @@ export class MapEditorComponent implements OnInit {
 		}
 
 		loader
-			.add([this.ramp_dir, this.water_dir, this.no_passing_dir, this.no_building_dir])
+			.add([this.map_editor_assets_dir, this.water_dir, this.no_passing_dir, this.no_building_dir])
 			.load(setup)
 			.on("complete", (loader, resources) => {
-			this.generatePixiCanvas();
+
+			// Basis of Blueprint Mode
 			this.generateMapTextures();
-			this.generateContainer();
+			this.generatePixiCanvas();
+			this.generateContainers();
+			this.renderDrawOptions();
+			this.renderBlueprintMap();
 			this.addBlueprintInputs();
 
 		})
-	
+	}
+
+// Go to Render Mode
+	goToRenderMode() {
+		if (!this.render_mode) {
+			this.render_mode = true;
+			this.blueprint_mode = false;
+
+			this.Blueprint.currentTool = {category: "", value: 0};
+			this.container_left.removeChildren(1, this.container_left.children.length);
+			this.container_right.removeChildren(1, this.container_right.children.length);
+		}
+	}
+
+// Go to Blueprint Mode
+	goToBlueprintMode() {
+		if (!this.blueprint_mode) {
+			this.render_mode = false;
+			this.blueprint_mode = true;
+
+			console.log(new Date());
+			this.renderDrawOptions();
+			this.renderBlueprintMap();
+			
+			this.mapEditorService.map.validateMapTiles();
+			console.log(new Date());
+		}
 	}
 
 // Create Form Control and Group for Dimension Change
 	private createFormDimension() {
-		this.height_change = new FormControl('', {validators: [Validators.required, Validators.pattern(/^[0-9]*$/)]});
-		this.width_change = new FormControl('', {validators: [Validators.required, Validators.pattern(/^[0-9]*$/)]});
+		this.height_change = new FormControl(100, {validators: [Validators.required]});
+		this.width_change = new FormControl(100, {validators: [Validators.required]});
 		this.dimension_change = new FormGroup({
 			'height_change': this.height_change,
 			'width_change': this.width_change
 		})
 	}
 
-// Editor Functionalities
+// Changes Dimension of the Map by accessing form control
 	private requestChangeDimensions() {
-		console.log(this.height_change.value);
-		console.log(this.width_change.value);
-	}
-// isnumber
-	private isNumber(event) {
-		if (isNaN(event)) {
-			return false;
+		let newHeight = Math.round(this.height_change.value);
+		let newWidth = Math.round(this.width_change.value);
+
+		// add confirmation if client is sure
+
+		// Changes dimensions in MapEditorService
+		if (this.mapEditorService.changeDimensions(newHeight, newWidth)) {
+			// Removes all children in blueprint container (containers, sprites)
+			this.blueprint_container.removeChildren(0, this.blueprint_container.children.length);
+			// Empties the tile containers as it still contains the sprites
+			this.Blueprint.tileContainers = [];
+			// Render blueprint map
+			this.renderBlueprintMap();
 		}
-		// var charCode = (event.which) ? event.which : event.keyCode;
-  //  			if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-  //       		return false;
-  //  			}
-  // 		return true;
-  		// console.log(event);
 	}
 
 // Initializes the default map (may retrieve saved map from cache if previously there) and Render Scale
@@ -228,12 +254,6 @@ export class MapEditorComponent implements OnInit {
 		if (this.mapEditorService.newMap) {
 			this.mapEditorService.generateDefaultMap();
 		}
-		
-
-		// Determines the scale of how big the tiles should be depending on map height/width
-		let scaleX = (this.RENDERER_WIDTH - 200) / this.mapEditorService.width;
-		let scaleY = (this.RENDERER_HEIGHT- 20) / this.mapEditorService.height;
-		this.RENDER_SCALE = Math.min(scaleX, scaleY);
 	}
 
 // Initializes and generates the canvas for the Map Editor, and initializes Interaction Manager
@@ -257,12 +277,10 @@ export class MapEditorComponent implements OnInit {
 	}	
 
 // Sets up a container for the Map Tileset and Blueprint container
-	private generateContainer() {
+	private generateContainers() {
 		// Connects stage to appropriate containers with childs
 		this.container_left = new Container();
 		this.container_right = new Container();
-		this.blueprint_container = new Container();
-		this.container_right.addChild(this.blueprint_container);
 		this.canvas.stage.addChild(this.container_right);
 		this.canvas.stage.addChild(this.container_left);
 
@@ -281,50 +299,56 @@ export class MapEditorComponent implements OnInit {
 		texture_right.drawRect(this.CONTAINER_LEFT_WIDTH, 0, this.CONTAINER_RIGHT_WIDTH, this.RENDERER_HEIGHT);
 		texture_right.endFill();
 		this.container_right.addChild(texture_right);
-		// Change index of the blueprint container to be on top
-		this.container_right.setChildIndex(this.blueprint_container, 1);
-	
-		this.renderBlueprintMap();
-		this.renderDrawOptions();
-
-		// Aligns Blueprint Container in the centre of the right container
-		this.blueprint_container.position.x = (this.container_right.width - 100) / 2;
-		this.blueprint_container.position.y = (this.container_right.height - this.blueprint_container.height) / 2;
-
 	}
 
 // Generate MapTile texture for sprite generation for rendering the MapTiles
 // Requires Render Scale for MapTile Sizing
 	private generateMapTextures() {
-		let texture0, texture1, texture2, texture3;
-		let textureArray = [texture0, texture1, texture2, texture3];
+		// Old code that uses PIXI.graphics instead
+		// let texture0, texture1, texture2, texture3;
+		// let textureArray = [texture0, texture1, texture2, texture3];
 
-		for (let i = 0; i < textureArray.length; i++) {
-			textureArray[i] = new Graphics();
-			textureArray[i].lineStyle(1, this.Blueprint.TILE_BORDER_COLOUR, 1);
-			textureArray[i].beginFill(this.Blueprint.TILE_COLOURS[i]);
-			textureArray[i].drawRect(0, 0, this.RENDER_SCALE, this.RENDER_SCALE);
-			textureArray[i].endFill();
-			this.height_texture_array[i] = this.canvas.renderer.generateTexture(textureArray[i])
+		// for (let i = 0; i < textureArray.length; i++) {
+		// 	textureArray[i] = new Graphics();
+		// 	textureArray[i].lineStyle(1, this.Blueprint.TILE_BORDER_COLOUR, 1);
+		// 	textureArray[i].beginFill(this.Blueprint.TILE_COLOURS[i]);
+		// 	textureArray[i].drawRect(0, 0, this.RENDER_SCALE, this.RENDER_SCALE);
+		// 	textureArray[i].endFill();
+		// 	this.height_texture_array[i] = this.canvas.renderer.generateTexture(textureArray[i])
+		// }
+
+
+		this.map_editor_assets = resources[this.map_editor_assets_dir].texture.baseTexture;
+		// Height Textures
+		for (let i = 0; i < this.height_texture_array.length; i++) {
+			let rectangle = new PIXI.Rectangle(i * 100, 100, 100, 100);
+			this.height_texture_array[i] = new PIXI.Texture(this.map_editor_assets, rectangle);
 		}
 
-		this.all_ramps_texture = resources[this.ramp_dir].texture.baseTexture;
+		// Ramp Textures
 		for (let i = 0; i < this.ramp_container_array.length; i++) {
-
 			let rectangle = new PIXI.Rectangle(i * 100, 0, 100, 100);
-			this.ramp_texture_array[i] = new PIXI.Texture(this.all_ramps_texture, rectangle);
+			this.ramp_texture_array[i] = new PIXI.Texture(this.map_editor_assets, rectangle);
 		}
 
+		// Other Textures
 		this.water_texture = resources[this.water_dir].texture;
 		this.no_passing_texture = resources[this.no_passing_dir].texture;
 		this.no_building_texture = resources[this.no_building_dir].texture;
 		this.other_texture_array = [this.no_passing_texture, this.no_building_texture];
 	}
 
-// Change rendering to encompass all different tiles, not just height
-
-// Render blueprint map /
+// Render blueprint map
 	private renderBlueprintMap() {
+		// Adds blueprint Container to the right container
+		this.blueprint_container = new Container();
+		this.container_right.addChild(this.blueprint_container);
+		// Determines the scale of how big the tiles should be depending on map height/width
+		let scaleX = (this.RENDERER_WIDTH - 200) / this.mapEditorService.width;
+		let scaleY = (this.RENDERER_HEIGHT- 20) / this.mapEditorService.height;
+		this.RENDER_SCALE = Math.min(scaleX, scaleY);
+
+		this.Blueprint.tileContainers = [];
 		// Attaches a container and sprite to each tile in Blueprint and Renders
 		for (let x = 0; x < this.mapEditorService.width; x++) {
 			this.Blueprint.tileContainers.push([]);
@@ -333,15 +357,70 @@ export class MapEditorComponent implements OnInit {
 				this.Blueprint.tileContainers[x][y].x = x * this.RENDER_SCALE;
 				this.Blueprint.tileContainers[x][y].y = y * this.RENDER_SCALE;
 
-				let mapTileValue = Number(this.mapEditorService.tiles[x][y]);
-				let sprite = new Sprite(this.height_texture_array[mapTileValue]);
-				this.addTileInteraction(sprite, x, y);
+				let currentTile = this.mapEditorService.tiles[x][y];
 
+				// Gets base tile of the current Tile
+				let baseTile = this.Tile.checkBase(currentTile);
+				let sprite: PIXI.Sprite;
+				switch (baseTile) {
+					case this.Tile.horizontal_ramp:
+						sprite = new Sprite(this.ramp_texture_array[0]);
+						break;
+					case this.Tile.vertical_ramp:
+						sprite = new Sprite(this.ramp_texture_array[1]);
+						break;
+					case this.Tile.diagonal1_ramp:
+						sprite = new Sprite(this.ramp_texture_array[2]);
+						break;
+					case this.Tile.diagonal2_ramp:
+						sprite = new Sprite(this.ramp_texture_array[3]);
+						break;
+					case this.Tile.water_tile:
+						sprite = new Sprite(this.water_texture);
+						break;
+					// Will catch all the height cases
+					default:
+						let height = Number(baseTile);
+						sprite = new Sprite(this.height_texture_array[height]);
+						break;
+				}
+				sprite.height = this.RENDER_SCALE;
+				sprite.width = this.RENDER_SCALE;
+				this.addTileInteraction(sprite, x, y);
 				this.Blueprint.tileContainers[x][y].addChild(sprite);
+
+				// Adds Impassable Sprite
+				if (this.Tile.checkImpassable(currentTile)) {
+					let impassableSprite = new Sprite(this.no_passing_texture);
+					impassableSprite.width = this.RENDER_SCALE / 2;
+					impassableSprite.height = this.RENDER_SCALE / 2;
+
+					// Always add sprite at index of 1
+					this.Blueprint.tileContainers[x][y].addChildAt(impassableSprite, 1);
+				}
+
+				// Adds Unbuildable Sprite
+				if (this.Tile.checkUnbuildable(currentTile)) {
+					let unbuildableSprite = new Sprite(this.no_building_texture);
+					unbuildableSprite.width = this.RENDER_SCALE / 2;
+					unbuildableSprite.height = this.RENDER_SCALE / 2;
+					unbuildableSprite.position.set(this.RENDER_SCALE / 2, this.RENDER_SCALE / 2);
+
+					// Ensures that sprite is always added at the last index
+					if (this.Blueprint.tileContainers[x][y].children.length == 1) {
+						this.Blueprint.tileContainers[x][y].addChildAt(unbuildableSprite, 1);
+					} else if (this.Blueprint.tileContainers[x][y].children.length == 2) {
+						this.Blueprint.tileContainers[x][y].addChildAt(unbuildableSprite, 2);
+					}
+				}
 
 				this.blueprint_container.addChild(this.Blueprint.tileContainers[x][y]);
 			}
 		};
+
+		// Aligns Blueprint Container in the centre of the right container
+		this.blueprint_container.x = (this.container_right.width - 100) / 2;
+		this.blueprint_container.y = (this.container_right.height - this.blueprint_container.height) / 2;
 	}
 
 // Draw options (On Left Container)
@@ -521,6 +600,7 @@ export class MapEditorComponent implements OnInit {
 				case "Other":
 					let otherChildrenLength = this.other_container_array[data.value].children.length;
 					this.other_container_array[data.value].removeChildAt(otherChildrenLength - 1);
+					break;
 			}
 		}
 
@@ -558,6 +638,8 @@ export class MapEditorComponent implements OnInit {
 
 						// Creates new sprite out of height value
 						let heightSprite = new Sprite(this.height_texture_array[newHeight]);
+						heightSprite.height = this.RENDER_SCALE;
+						heightSprite.width = this.RENDER_SCALE;
 						// Add tile interaction with new sprite
 						this.addTileInteraction(heightSprite, x, y);
 						// Add sprite to the tile container
@@ -571,7 +653,7 @@ export class MapEditorComponent implements OnInit {
 					// New Ramp value (Horizontal = 0, Vertical = 1, Diagonal1 = 2, Diagonal2 = 3)
 					let newRamp = this.Blueprint.currentTool.value;
 
-					let newRampString = this.Tile.getRampArray()[newRamp];
+					let newRampString = this.Tile.ramp_array[newRamp];
 
 					// Checks if the current tile is already the same ramp
 					if (!(this.Tile.contains(this.mapEditorService.tiles[x][y], newRampString))) {
@@ -593,7 +675,7 @@ export class MapEditorComponent implements OnInit {
 					break;
 				// Water Case
 				case "Water":
-					let waterTile = this.Tile.getWaterTile();
+					let waterTile = this.Tile.water_tile;
 
 					// Checks if the current tile is already water
 					if (!(this.Tile.contains(this.mapEditorService.tiles[x][y], waterTile))) {
@@ -611,8 +693,8 @@ export class MapEditorComponent implements OnInit {
 						this.Blueprint.tileContainers[x][y].addChildAt(waterSprite, 0);
 						// Update tile array with water tile
 						this.mapEditorService.tiles[x][y] = this.Tile.changeBase(this.mapEditorService.tiles[x][y], waterTile);
-						break;
 					}
+					break;
 				// Other (Functions) Case
 				case "Other":
 					let currentTile = this.mapEditorService.tiles[x][y];
@@ -681,10 +763,7 @@ export class MapEditorComponent implements OnInit {
 				this.changeTile(x, y);
 			}	
 		});
-		
 	}
-
-
 
 // Function called when component is destroyed
 	ngOnDestroy() {
