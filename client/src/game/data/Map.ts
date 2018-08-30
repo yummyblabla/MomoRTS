@@ -10,6 +10,7 @@ export class Map {
 	buildings: any; // An array of Buildings 
 	units: any; // An array of units
 	defaultHeight: number; // defaultHeight - The default height of the map
+	valid: boolean // Checks if map is valid
 
 	Tile: Tile;
 
@@ -27,104 +28,151 @@ export class Map {
 
 	// Checks base tiles of the map to see if position of heights and ramps are valid
 	validateMapTiles() {
+		this.valid = true;
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				let currentTile = this.Tile.checkBase(this.tiles[x][y]);
-				// Checks if adjacent heights are separated by a difference of 1
+				// Checks if adjacent heights are separated by a difference of 1 or invalid edge height
 				if (this.Tile.height_array.includes(currentTile)) {
 					let tileHeight = Number(this.tiles[x][y]);
+
+					// Checks edges if tileheight is more than 2
+					if (tileHeight >= 2 && (x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1)) {
+						this.throwError(x, y);
+					}
+
 					if (x == 0) { // Checks left edges
 						if (y == 0) { // TopLeft corner
 							let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
+							let bottomRightCheck = this.Tile.checkBase(this.tiles[x + 1][y + 1]);
 							let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
 
-							this.checkInvalidAdjacentHeight(tileHeight, [bottomCheck, rightCheck], x, y);
+							this.checkInvalidAdjacentHeight(tileHeight, [bottomCheck, bottomRightCheck, rightCheck], x, y);
 						} else if (y == this.height - 1) { // BottomLeft corner
 							let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
+							let topRightCheck = this.Tile.checkBase(this.tiles[x + 1][y - 1]);
 							let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
 
-							this.checkInvalidAdjacentHeight(tileHeight, [topCheck, rightCheck], x, y);
+							this.checkInvalidAdjacentHeight(tileHeight, [topCheck, topRightCheck, rightCheck], x, y);
 						} else { // All other cases
-							// Checks Top, Bottom, Right tiles
 							let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
+							let topRightCheck = this.Tile.checkBase(this.tiles[x + 1][y - 1]);
 							let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
 							let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
+							let bottomRightCheck = this.Tile.checkBase(this.tiles[x + 1][y + 1]);
 
-							this.checkInvalidAdjacentHeight(tileHeight, [topCheck, rightCheck, bottomCheck], x, y);
+							this.checkInvalidAdjacentHeight(tileHeight, [topCheck, topRightCheck, rightCheck, bottomCheck, bottomRightCheck], x, y);
 						}
-					} else if (y == 0) { // Checks top edges minus topleft corner
-						if (x == this.width - 1) { // TopRight corner
+					} else if (x == this.width - 1) { // Checks right edges
+						if (y == 0) { // Topright corner
 							let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
 							let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
+							let bottomLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y + 1]);
 
-							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, bottomCheck], x, y);
+							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, bottomCheck, bottomLeftCheck], x, y);
+						} else if (y == this.height - 1) { // BottomRight corner
+							let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
+							let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
+							let topLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y - 1]);
+
+							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, topCheck, topLeftCheck], x, y);
 						} else { // All other cases
 							let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
-							let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
-							let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
-
-							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, bottomCheck, rightCheck], x, y);
-						}
-					} else if (x == this.width - 1) { // Checks right edges minus topright corner
-						if (y == this.height - 1) { // BottomRight corner
-							let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
-							let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
-
-							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, topCheck], x, y);
-						} else {
-							let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
 							let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
 							let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
+							let topLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y - 1]);
+							let bottomLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y + 1]);
 
-							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, topCheck, bottomCheck], x, y);
+							this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, topCheck, topLeftCheck, bottomCheck, bottomLeftCheck], x, y);
 						}
+					} else if (y == 0) { // Checks top edges minus corners
+						let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
+						let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
+						let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
+						let bottomLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y + 1]);
+						let bottomRightCheck = this.Tile.checkBase(this.tiles[x + 1][y + 1]);
+
+						this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, bottomCheck, rightCheck, bottomLeftCheck, bottomRightCheck], x, y);
+						
 					} else if (y == this.height - 1) { // Checks bottom edges minus corners
 						let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
 						let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
 						let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
+						let topRightCheck = this.Tile.checkBase(this.tiles[x + 1][y - 1]);
+						let topLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y - 1]);
 
-						this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, topCheck, topCheck], x, y);
+						this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, topCheck, topCheck, topRightCheck, topLeftCheck], x, y);
 					} else { // All non-edge cases
 						let leftCheck = this.Tile.checkBase(this.tiles[x - 1][y]);
 						let bottomCheck = this.Tile.checkBase(this.tiles[x][y + 1]);
 						let topCheck = this.Tile.checkBase(this.tiles[x][y - 1]);
 						let rightCheck = this.Tile.checkBase(this.tiles[x + 1][y]);
+						let topRightCheck = this.Tile.checkBase(this.tiles[x + 1][y - 1]);
+						let topLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y - 1]);
+						let bottomLeftCheck = this.Tile.checkBase(this.tiles[x - 1][y + 1]);
+						let bottomRightCheck = this.Tile.checkBase(this.tiles[x + 1][y + 1]);
 
-						this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, bottomCheck, topCheck, rightCheck], x, y);
+						this.checkInvalidAdjacentHeight(tileHeight, [leftCheck, bottomCheck, topCheck, rightCheck, topRightCheck, topLeftCheck, bottomLeftCheck, bottomRightCheck], x, y);
 					}
 				}
 				// Checks validity of ramp tiles
 				if (this.Tile.ramp_array.includes(currentTile)) {
+					// Ramps cannot be on edges
+					if (x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1) {
+						this.throwError(x, y);
+					}
+
+					let leftTile = this.Tile.checkBase(this.tiles[x - 1][y]);
+					let rightTile = this.Tile.checkBase(this.tiles[x + 1][y]);
+					let topTile = this.Tile.checkBase(this.tiles[x][y - 1]);
+					let bottomTile = this.Tile.checkBase(this.tiles[x][y + 1]);
+					let bottomRightTile = this.Tile.checkBase(this.tiles[x + 1][y + 1]);
+					let topLeftTile = this.Tile.checkBase(this.tiles[x - 1][y - 1]);
+					let topRightTile = this.Tile.checkBase(this.tiles[x + 1][y - 1]);
+					let bottomLeftTile = this.Tile.checkBase(this.tiles[x - 1][y + 1]);
+
 					// Horizontal ramp
 					if (this.Tile.horizontal_ramp == currentTile) {
-						// Checks if ramp is on side left/right edges and side tiles are height tiles
-						if (x == 0 || x == this.width - 1 
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x - 1][y]))
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x + 1][y]))
+						// Checks if side tiles are height tiles
+						if (!this.Tile.height_array.includes(leftTile)
+							|| !this.Tile.height_array.includes(rightTile)
 							) {
 							this.throwError(x, y);
 						} else { // Checks if difference in side tile height is 1
-							let leftTile = Number(this.Tile.checkBase(this.tiles[x - 1][y]));
-							let rightTile = Number(this.Tile.checkBase(this.tiles[x + 1][y]));
+							let leftHeight = Number(leftTile);
+							let rightHeight = Number(rightTile);
+							let maxHeight = Math.max(leftHeight, rightHeight);
 
-							if (!(Math.abs(leftTile - rightTile) == 1)) {
+							if (!(Math.abs(leftHeight - rightHeight) == 1)) {
+								this.throwError(x, y);
+							}
+							if (this.Tile.height_array.includes(topTile) && (Number(topTile) != maxHeight)) {
+								this.throwError(x, y);
+							}
+							if (this.Tile.height_array.includes(bottomTile) && (Number(bottomTile) != maxHeight)) {
 								this.throwError(x, y);
 							}
 						}
 					}
 					// Vertical ramp
 					if (this.Tile.vertical_ramp == currentTile) {
-						// Checks if ramp is on side top/botom edges and side tiles are height tiles
-						if (y == 0 || y == this.height - 1
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x][y - 1]))
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x][y + 1]))
+						// Checks if side tiles are height tiles
+						if (!this.Tile.height_array.includes(topTile)
+							|| !this.Tile.height_array.includes(bottomTile)
 							) {
 							this.throwError(x, y);
 						} else { // Checks if difference in side tile height is 1
-							let topTile = Number(this.Tile.checkBase(this.tiles[x][y - 1]));
-							let bottomTile = Number(this.Tile.checkBase(this.tiles[x][y + 1]));
+							let topHeight = Number(topTile);
+							let bottomHeight = Number(bottomTile);
+							let maxHeight = Math.max(topHeight, bottomHeight);
 
-							if (!(Math.abs(topTile - bottomTile) == 1)) {
+							if (!(Math.abs(topHeight - bottomHeight) == 1)) {
+								this.throwError(x, y);
+							}
+							if (this.Tile.height_array.includes(leftTile) && (Number(leftTile) != maxHeight)) {
+								this.throwError(x, y);
+							}
+							if (this.Tile.height_array.includes(rightTile) && (Number(rightTile) != maxHeight)) {
 								this.throwError(x, y);
 							}
 						}
@@ -132,61 +180,87 @@ export class Map {
 					// Diagonal1 (\) ramp
 					if (this.Tile.diagonal1_ramp == currentTile) {
 						// Checks if ramp is on side edges and side tiles are height tiles
-						if (x == 0 || y == 0 || x == this.width - 1 || y == this.height - 1 // Side edge checks
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x - 1][y - 1])) // Top Left
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x][y - 1])) // Top
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x - 1][y])) // Left
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x][y + 1])) // Bottom
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x + 1][y])) // Right
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x + 1][y + 1])) // Bottom Right
+						if (!this.Tile.height_array.includes(topLeftTile) // Top Left
+							|| !this.Tile.height_array.includes(bottomRightTile) // Bottom Right
 							) {
 							this.throwError(x, y);
-						} else { // Checks if the two sections of height tiles differ by 1 and are the same
-							let topLeft = this.Tile.checkBase(this.tiles[x - 1][y - 1]);
-							let top = this.Tile.checkBase(this.tiles[x][y - 1]);
-							let left = this.Tile.checkBase(this.tiles[x - 1][y]);
-							let bottom = this.Tile.checkBase(this.tiles[x][y + 1]);
-							let right = this.Tile.checkBase(this.tiles[x + 1][y]);
-							let bottomRight = this.Tile.checkBase(this.tiles[x + 1][y + 1]);
-
-							if (!(topLeft == top && topLeft == left && bottom == right && bottom == bottomRight 
-								&& (Math.abs(Number(topLeft) - Number(bottomRight)) == 1)
-								)) {
+						} else { // Checks if the two sections of height tiles differ by 1 adjacent heights are the min height
+							let topLeftHeight = Number(topLeftTile);
+							let bottomRightHeight = Number(bottomRightTile);
+		
+							if ((Math.abs(topLeftHeight - bottomRightHeight) == 1)) {
+								if (topLeftHeight > bottomRightHeight) {
+									if (this.Tile.height_array.includes(bottomTile)) {
+										if (Number(bottomTile) != bottomRightHeight) {
+											this.throwError(x, y);
+										}
+									}
+									if (this.Tile.height_array.includes(rightTile)) {
+										if (Number(rightTile) != bottomRightHeight) {
+											this.throwError(x, y);
+										}
+									}
+								} else {
+									if (this.Tile.height_array.includes(topTile)) {
+										if (Number(topTile) != topLeftHeight) {
+											this.throwError(x, y);
+										}
+									}
+									if (this.Tile.height_array.includes(leftTile)) {
+										if (Number(leftTile) != topLeftHeight) {
+											this.throwError(x, y);
+										}
+									}
+								}
+							} else {
 								this.throwError(x, y);
 							}
 						}
 					}
 					// Diagonal2 (/) ramp
 					if (this.Tile.diagonal2_ramp == currentTile) {
-						// Checks if ramp is on side edges and side tiles are height tiles
-						if (x == 0 || y == 0 || x == this.width - 1 || y == this.height - 1 // Side edge checks
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x + 1][y - 1])) // Top Right
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x][y - 1])) // Top
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x + 1][y])) // Right
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x][y + 1])) // Bottom
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x - 1][y])) // Left
-							|| !this.Tile.height_array.includes(this.Tile.checkBase(this.tiles[x - 1][y + 1])) // Bottom Left
+						// Checks if side tiles are height tiles
+						if (!this.Tile.height_array.includes(topRightTile)
+							|| !this.Tile.height_array.includes(this.Tile.checkBase(bottomLeftTile)) // Bottom Left
 							) {
 							this.throwError(x, y);
-						} else { // Checks if the two sections of height tiles differ by 1 and are the same
-							let topRight = this.Tile.checkBase(this.tiles[x + 1][y - 1]);
-							let top = this.Tile.checkBase(this.tiles[x][y - 1]);
-							let right = this.Tile.checkBase(this.tiles[x + 1][y]);
-							let bottom = this.Tile.checkBase(this.tiles[x][y + 1]);
-							let left = this.Tile.checkBase(this.tiles[x - 1][y]);
-							let bottomLeft = this.Tile.checkBase(this.tiles[x - 1][y + 1]);
-
-							if (!(topRight == top && topRight == right && bottom == left && bottom == bottomLeft 
-								&& (Math.abs(Number(topRight) - Number(bottomLeft)) == 1)
-								)) {
+						} else { // Checks if the two sections of height tiles differ by 1 adjacent heights are the min height
+							let topRightHeight = Number(topRightTile);
+							let bottomLeftHeight = Number(bottomLeftTile);
+	
+							if ((Math.abs(topRightHeight - bottomLeftHeight) == 1)) {
+								if (topRightHeight > bottomLeftHeight) {
+									if (this.Tile.height_array.includes(bottomTile)) {
+										if (Number(bottomTile) != bottomLeftHeight) {
+											this.throwError(x, y);
+										}
+									}
+									if (this.Tile.height_array.includes(leftTile)) {
+										if (Number(leftTile) != bottomLeftHeight) {
+											this.throwError(x, y);
+										}
+									}
+								} else {
+									if (this.Tile.height_array.includes(topTile)) {
+										if (Number(topTile) != topRightHeight) {
+											this.throwError(x, y);
+										}
+									}
+									if (this.Tile.height_array.includes(rightTile)) {
+										if (Number(rightTile) != topRightHeight) {
+											this.throwError(x, y);
+										}
+									}
+								}
+							} else {
 								this.throwError(x, y);
 							}
 						}
 					}
-
 				}
 			}
 		}
+		return this.valid;
 	}
 
 	private checkInvalidAdjacentHeight(pivot: number, checkTiles, x: number, y) {
@@ -197,10 +271,10 @@ export class Map {
 				}
 			}
 		}
-		
 	}
 
 	private throwError(x, y) {
 		console.log("error at " + x + " " + y);
+		this.valid = false;
 	}
 }

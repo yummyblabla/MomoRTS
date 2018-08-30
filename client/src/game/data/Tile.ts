@@ -7,9 +7,9 @@ export class Tile {
 			Vertical - V
 			Diagonal1 (\) - D
 			Diagonal2 (/) - E
-		Water
-			Water - W
+			
 	Functional
+		Water - W
 		Impassable - X
 		Unbuildable - Y
 
@@ -27,11 +27,28 @@ export class Tile {
 	// MapEditor access for which ramp to use based on currentTool value
 	ramp_array: string[] = [this.horizontal_ramp, this.vertical_ramp, this.diagonal1_ramp, this.diagonal2_ramp];
 
+	water: string = "W";
 	water_tile: string = "W";
-
 	impassable: string = "X";
 	unbuildable: string = "Y";
 	
+	// Add Water function to tile
+	addWater(tile: string) {
+		let value = tile.toString();
+		return value + this.water;
+	}
+
+	// Remove Water function from tile
+	removeWater(tile: string) {
+		return tile.replace(this.water, "");
+	}
+
+	// Check if the tile has water
+	checkWater(tile: string) {
+		let value = tile.toString();
+		return (value.includes(this.water));
+	}
+
 	// Add impassable function to tile
 	addImpassable(tile: string) {
 		let value = tile.toString();
